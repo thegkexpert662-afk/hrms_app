@@ -10,7 +10,7 @@ class Employee {
 class AttendanceRecord {
   final String employeeId; final DateTime date; DateTime? punchIn, punchOut; Duration breakTime; String status; bool wfh;
   AttendanceRecord({required this.employeeId, required this.date, this.punchIn, this.punchOut, this.breakTime = Duration.zero, this.status = 'Present', this.wfh = false});
-  Duration get workingTime => punchIn == null ? Duration.zero : Duration(milliseconds: ((punchOut ?? DateTime.now()).difference(punchIn!).inMilliseconds - breakTime.inMilliseconds).clamp(0, 86400000));
+  Duration get workingTime => punchIn == null ? Duration.zero : Duration(milliseconds: ((punchOut ?? DateTime.now()).difference(punchIn!).inMilliseconds - breakTime.inMilliseconds).clamp(0, 86400000).toInt());
   Duration get overtime => workingTime > const Duration(hours: 8) ? workingTime - const Duration(hours: 8) : Duration.zero;
 }
 class LeaveRequest {
