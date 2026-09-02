@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../screens/hrms/hrms_navigator.dart';
+import '../screens/auth/auth_flow.dart';
 
 class Employee {
   final String id;
@@ -64,5 +64,5 @@ class HrmsService extends ChangeNotifier {
 class HrmsApp extends StatelessWidget {
   final HrmsService service;
   const HrmsApp({super.key,required this.service});
-  @override Widget build(BuildContext context)=>MaterialApp(debugShowCheckedModeBanner:false,title:'HRMS Management System',theme:ThemeData(useMaterial3:true,colorScheme:ColorScheme.fromSeed(seedColor:const Color(0xFF2563EB)),scaffoldBackgroundColor:const Color(0xFFF5F7FB)),home:HrmsNavigator(service:service));
+  @override Widget build(BuildContext context)=>MaterialApp(debugShowCheckedModeBanner:false,title:'HRMS Management System',theme:ThemeData(useMaterial3:true,colorScheme:ColorScheme.fromSeed(seedColor:const Color(0xFF2563EB)),scaffoldBackgroundColor:const Color(0xFFF5F7FB)),home:AuthFlow(service:service));
 }
