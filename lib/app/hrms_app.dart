@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../screens/hrms/all_modules_home.dart';
+import '../screens/hrms/hrms_navigator.dart';
 
 class Employee {
   final String id;
@@ -15,29 +15,29 @@ class AttendanceRecord {
   Duration breakTime;
   String status;
   bool wfh;
-  AttendanceRecord({required this.employeeId, required this.date, this.punchIn, this.punchOut, this.breakTime = Duration.zero, this.status = 'Present', this.wfh = false});
-  Duration get workingTime => punchIn == null ? Duration.zero : Duration(milliseconds: ((punchOut ?? DateTime.now()).difference(punchIn!).inMilliseconds - breakTime.inMilliseconds).clamp(0, 86400000).toInt());
-  Duration get overtime => workingTime > const Duration(hours: 8) ? workingTime - const Duration(hours: 8) : Duration.zero;
+  AttendanceRecord({required this.employeeId, required this.date, this.punchIn, this.punchOut, this.breakTime=Duration.zero, this.status='Present', this.wfh=false});
+  Duration get workingTime=>punchIn==null?Duration.zero:Duration(milliseconds:((punchOut??DateTime.now()).difference(punchIn!).inMilliseconds-breakTime.inMilliseconds).clamp(0,86400000).toInt());
+  Duration get overtime=>workingTime>const Duration(hours:8)?workingTime-const Duration(hours:8):Duration.zero;
 }
 
 class LeaveRequest {
-  final String id, employeeId, type, reason;
-  final DateTime from, to;
+  final String id,employeeId,type,reason;
+  final DateTime from,to;
   String status;
-  LeaveRequest({required this.id, required this.employeeId, required this.type, required this.from, required this.to, required this.reason, this.status = 'Pending'});
-  int get days => to.difference(from).inDays + 1;
+  LeaveRequest({required this.id,required this.employeeId,required this.type,required this.from,required this.to,required this.reason,this.status='Pending'});
+  int get days=>to.difference(from).inDays+1;
 }
 
 class PayrollRecord {
   final String employeeId;
-  final double basic, allowances, bonus, overtime, deductions;
-  PayrollRecord({required this.employeeId, required this.basic, required this.allowances, required this.bonus, required this.overtime, required this.deductions});
-  double get gross => basic + allowances + bonus + overtime;
-  double get net => gross - deductions;
+  final double basic,allowances,bonus,overtime,deductions;
+  PayrollRecord({required this.employeeId,required this.basic,required this.allowances,required this.bonus,required this.overtime,required this.deductions});
+  double get gross=>basic+allowances+bonus+overtime;
+  double get net=>gross-deductions;
 }
 
 class HrmsService extends ChangeNotifier {
-  final List<Employee> employees = [
+  final List<Employee> employees=[
     Employee(id:'EMP001',name:'Aarav Sharma',department:'Engineering',designation:'Senior Developer',manager:'HR Admin',joiningDate:DateTime(2024,2,12),employmentType:'Full Time',status:'Active',phone:'9876543210',email:'aarav@company.com'),
     Employee(id:'EMP002',name:'Ananya Singh',department:'Human Resources',designation:'HR Executive',manager:'HR Admin',joiningDate:DateTime(2025,5,6),employmentType:'Full Time',status:'Active',phone:'9876543211',email:'ananya@company.com'),
     Employee(id:'EMP003',name:'Rohan Verma',department:'Sales',designation:'Sales Manager',manager:'HR Admin',joiningDate:DateTime(2023,8,20),employmentType:'Full Time',status:'Active',phone:'9876543212',email:'rohan@company.com'),
@@ -64,5 +64,5 @@ class HrmsService extends ChangeNotifier {
 class HrmsApp extends StatelessWidget {
   final HrmsService service;
   const HrmsApp({super.key,required this.service});
-  @override Widget build(BuildContext c)=>MaterialApp(debugShowCheckedModeBanner:false,title:'HRMS Management System',theme:ThemeData(useMaterial3:true,colorScheme:ColorScheme.fromSeed(seedColor:const Color(0xFF2563EB)),scaffoldBackgroundColor:const Color(0xFFF5F7FB)),home:AllModulesHome(service:service));
+  @override Widget build(BuildContext context)=>MaterialApp(debugShowCheckedModeBanner:false,title:'HRMS Management System',theme:ThemeData(useMaterial3:true,colorScheme:ColorScheme.fromSeed(seedColor:const Color(0xFF2563EB)),scaffoldBackgroundColor:const Color(0xFFF5F7FB)),home:HrmsNavigator(service:service));
 }
