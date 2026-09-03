@@ -40,38 +40,46 @@ class _LifecycleManagementScreenState extends State<LifecycleManagementScreen> {
     name.dispose(); detail.dispose(); status.dispose();
   }
 
-  @override Widget build(BuildContext context) => ListView(
-    padding: const EdgeInsets.all(16),
-    children: [
-      Row(children: [Expanded(child: Text('Employee Lifecycle', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800))), const Icon(Icons.timeline, size: 32)]),
-      const SizedBox(height: 8),
-      const Text('Manage the complete employee journey from recruitment to exit.'),
-      const SizedBox(height: 16),
-      ...sections.map((s) => _sectionCard(s)),
-    ],
-  );
-
-  Widget _sectionCard(String s) => Card(
-    margin: const EdgeInsets.only(bottom: 10),
-    child: ExpansionTile(
-      leading: Icon(_icon(s)),
-      title: Text(s, style: const TextStyle(fontWeight: FontWeight.w700)),
-      subtitle: Text('${data[s]!.length} record${data[s]!.length == 1 ? '' : 's'}'),
+  @override Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.all(16),
       children: [
-        if (data[s]!.isEmpty) const Padding(padding: EdgeInsets.all(16), child: Align(alignment: Alignment.centerLeft, child: Text('No records yet.'))),
-        ...List.generate(data[s]!.length, (i) {
-          final r = data[s]![i];
-          return ListTile(
-            title: Text(r['name'] ?? ''),
-            subtitle: Text('${r['detail'] ?? ''}\n${r['status'] ?? ''} • ${r['date'] ?? ''}'),
-            isThreeLine: true,
-            trailing: IconButton(icon: const Icon(Icons.delete_outline), onPressed: () => setState(() { data[s]!.removeAt(i); })),
-          );
-        }),
-        Padding(padding: const EdgeInsets.fromLTRB(16, 4, 16, 16), child: Align(alignment: Alignment.centerRight, child: FilledButton.icon(onPressed: () => add(s), icon: const Icon(Icons.add), label: const Text('Add Record')))),
+        Row(children: [Expanded(child: Text('Employee Lifecycle', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800))), const Icon(Icons.timeline, size: 32)]),
+        const SizedBox(height: 8),
+        const Text('Manage the complete employee journey from recruitment to exit.'),
+        const SizedBox(height: 16),
+        ...sections.map(_sectionCard),
       ],
-    ),
-  );
+    );
+  }
+
+  Widget _sectionCard(String s) {
+    final records = data[s]!;
+    final children = <Widget>[];
+    if (records.isEmpty) {
+      children.add(const Padding(padding: EdgeInsets.all(16), child: Align(alignment: Alignment.centerLeft, child: Text('No records yet.'))));
+    } else {
+      for (var i = 0; i < records.length; i++) {
+        final r = records[i];
+        children.add(ListTile(
+          title: Text(r['name'] ?? ''),
+          subtitle: Text('${r['detail'] ?? ''}\n${r['status'] ?? ''} • ${r['date'] ?? ''}'),
+          isThreeLine: true,
+          trailing: IconButton(icon: const Icon(Icons.delete_outline), onPressed: () => setState(() { records.removeAt(i); })),
+        ));
+      }
+    }
+    children.add(Padding(padding: const EdgeInsets.fromLTRB(16, 4, 16, 16), child: Align(alignment: Alignment.centerRight, child: FilledButton.icon(onPressed: () => add(s), icon: const Icon(Icons.add), label: const Text('Add Record')))));
+    return Card(
+      margin: const EdgeInsets.only(bottom: 10),
+      child: ExpansionTile(
+        leading: Icon(_icon(s)),
+        title: Text(s, style: const TextStyle(fontWeight: FontWeight.w700)),
+        subtitle: Text('${records.length} record${records.length == 1 ? '' : 's'}'),
+        children: children,
+      ),
+    );
+  }
 
   IconData _icon(String s) {
     if (s == 'Recruitment') return Icons.person_search;
