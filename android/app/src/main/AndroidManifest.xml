@@ -6,9 +6,9 @@
     <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:label="hrms_app"
+        android:label="HRMS"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@drawable/ic_hrms_logo">
         <activity
             android:name=".MainActivity"
             android:exported="true"
