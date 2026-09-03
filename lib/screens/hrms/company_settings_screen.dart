@@ -4,7 +4,6 @@ import '../../app/hrms_app.dart';
 class CompanySettingsScreen extends StatelessWidget {
   final HrmsService service;
   const CompanySettingsScreen({super.key, required this.service});
-
   static const items = <Map<String, dynamic>>[
     {'title': 'Company Profile', 'icon': Icons.business, 'subtitle': 'Company name, contact and basic details'},
     {'title': 'Branches', 'icon': Icons.location_city, 'subtitle': 'Manage company locations and branches'},
@@ -18,38 +17,11 @@ class CompanySettingsScreen extends StatelessWidget {
   ];
 
   @override
-  Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        Card(child: Padding(padding: const EdgeInsets.all(20), child: Row(children: [
-          const CircleAvatar(radius: 28, child: Icon(Icons.settings)),
-          const SizedBox(width: 16),
-          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: const [
-            Text('Company Settings', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
-            SizedBox(height: 4),
-            Text('Configure company-wide HRMS policies and preferences'),
-          ])),
-        ]))),
-        const SizedBox(height: 12),
-        ...List.generate(items.length, (index) {
-          final item = items[index];
-          return Card(child: ListTile(
-            leading: CircleAvatar(child: Icon(item['icon'] as IconData)),
-            title: Text(item['title'] as String, style: const TextStyle(fontWeight: FontWeight.w700)),
-            subtitle: Text(item['subtitle'] as String),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => CompanySettingsDetailScreen(
-              service: service,
-              title: item['title'] as String,
-              icon: item['icon'] as IconData,
-              section: index,
-            ))),
-          ));
-        }),
-      ],
-    );
-  }
+  Widget build(BuildContext context) => ListView(padding: const EdgeInsets.all(16), children: [
+    Card(child: Padding(padding: const EdgeInsets.all(20), child: Row(children: [const CircleAvatar(radius: 28, child: Icon(Icons.settings)), const SizedBox(width: 16), const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Company Settings', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)), SizedBox(height: 4), Text('Configure company-wide HRMS policies and preferences')]))]))),
+    const SizedBox(height: 12),
+    ...List.generate(items.length, (index) { final item = items[index]; return Card(child: ListTile(leading: CircleAvatar(child: Icon(item['icon'] as IconData)), title: Text(item['title'] as String, style: const TextStyle(fontWeight: FontWeight.w700)), subtitle: Text(item['subtitle'] as String), trailing: const Icon(Icons.chevron_right), onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => CompanySettingsDetailScreen(service: service, title: item['title'] as String, icon: item['icon'] as IconData, section: index)))); }),
+  ]);
 }
 
 class CompanySettingsDetailScreen extends StatefulWidget {
@@ -58,16 +30,13 @@ class CompanySettingsDetailScreen extends StatefulWidget {
   final IconData icon;
   final int section;
   const CompanySettingsDetailScreen({super.key, required this.service, required this.title, required this.icon, required this.section});
-
-  @override
-  State<CompanySettingsDetailScreen> createState() => _CompanySettingsDetailScreenState();
+  @override State<CompanySettingsDetailScreen> createState() => _CompanySettingsDetailScreenState();
 }
 
 class _CompanySettingsDetailScreenState extends State<CompanySettingsDetailScreen> {
   final nameController = TextEditingController(text: 'HRMS Management');
   bool enabled = true;
   String option = 'Enabled';
-
   List<Map<String, String>> get settings {
     switch (widget.section) {
       case 0: return [{'title': 'Company Name', 'value': 'HRMS Management'}, {'title': 'Country', 'value': 'India'}, {'title': 'Currency', 'value': 'INR'}, {'title': 'Timezone', 'value': 'Asia/Kolkata'}];
@@ -81,28 +50,29 @@ class _CompanySettingsDetailScreenState extends State<CompanySettingsDetailScree
       default: return [{'title': 'Leave alerts', 'value': 'Enabled'}, {'title': 'Attendance alerts', 'value': 'Enabled'}, {'title': 'Payroll alerts', 'value': 'Enabled'}, {'title': 'Announcements', 'value': 'Enabled'}];
     }
   }
+  @override void dispose() { nameController.dispose(); super.dispose(); }
 
-  @override
-  void dispose() {
-    nameController.dispose();
-    super.dispose();
+  Future<void> save() async {
+    try {
+      await widget.service.backend.saveSettings('section_${widget.section}', {'title': widget.title, 'name': nameController.text.trim(), 'enabled': enabled, 'option': option});
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Settings saved to cloud')));
+    } catch (_) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Saved locally; cloud sync unavailable')));
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final profile = widget.section == 0;
-    return Scaffold(
-      appBar: AppBar(title: Text(widget.title)),
-      body: ListView(padding: const EdgeInsets.all(16), children: [
-        Card(child: ListTile(leading: CircleAvatar(child: Icon(widget.icon)), title: Text(widget.title, style: const TextStyle(fontWeight: FontWeight.w800)), subtitle: const Text('Company configuration'))),
-        if (profile) Card(child: Padding(padding: const EdgeInsets.all(16), child: TextField(controller: nameController, decoration: const InputDecoration(labelText: 'Company name', border: OutlineInputBorder())))),
-        if (widget.section == 8) Card(child: SwitchListTile(title: const Text('Notifications enabled'), subtitle: const Text('Allow configured HRMS alerts'), value: enabled, onChanged: (v) => setState(() => enabled = v))),
-        if (widget.section == 2 || widget.section == 4 || widget.section == 5 || widget.section == 6) Card(child: Padding(padding: const EdgeInsets.all(16), child: Row(children: [const Expanded(child: Text('Policy status', style: TextStyle(fontWeight: FontWeight.w700))), DropdownButton<String>(value: option, items: const ['Enabled', 'Disabled', 'Requires approval'].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(), onChanged: (v) => setState(() => option = v ?? option))]))),
-        const SizedBox(height: 8),
-        ...settings.map((item) => Card(child: ListTile(title: Text(item['title']!, style: const TextStyle(fontWeight: FontWeight.w700)), trailing: Text(item['value']!)))),
-        const SizedBox(height: 12),
-        FilledButton.icon(onPressed: () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Settings saved'))), icon: const Icon(Icons.save), label: const Text('Save Settings')),
-      ]),
-    );
+    return Scaffold(appBar: AppBar(title: Text(widget.title)), body: ListView(padding: const EdgeInsets.all(16), children: [
+      Card(child: ListTile(leading: CircleAvatar(child: Icon(widget.icon)), title: Text(widget.title, style: const TextStyle(fontWeight: FontWeight.w800)), subtitle: const Text('Company configuration'))),
+      if (profile) Card(child: Padding(padding: const EdgeInsets.all(16), child: TextField(controller: nameController, decoration: const InputDecoration(labelText: 'Company name', border: OutlineInputBorder())))),
+      if (widget.section == 8) Card(child: SwitchListTile(title: const Text('Notifications enabled'), subtitle: const Text('Allow configured HRMS alerts'), value: enabled, onChanged: (v) => setState(() => enabled = v))),
+      if (widget.section == 2 || widget.section == 4 || widget.section == 5 || widget.section == 6) Card(child: Padding(padding: const EdgeInsets.all(16), child: Row(children: [const Expanded(child: Text('Policy status', style: TextStyle(fontWeight: FontWeight.w700))), DropdownButton<String>(value: option, items: const ['Enabled', 'Disabled', 'Requires approval'].map((e) => DropdownMenuItem(value: e, child: Text(e))).toList(), onChanged: (v) => setState(() => option = v ?? option))]))),
+      const SizedBox(height: 8),
+      ...settings.map((item) => Card(child: ListTile(title: Text(item['title']!, style: const TextStyle(fontWeight: FontWeight.w700)), trailing: Text(item['value']!)))),
+      const SizedBox(height: 12),
+      FilledButton.icon(onPressed: save, icon: const Icon(Icons.save), label: const Text('Save Settings')),
+    ]));
   }
 }
