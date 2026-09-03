@@ -7,7 +7,6 @@ class HrmsBackendService {
   final FirebaseFirestore db = FirebaseFirestore.instance;
   final FirebaseAuth auth = FirebaseAuth.instance;
   String? companyId;
-
   User? get user => auth.currentUser;
 
   Future<void> saveOnboarding({required String fullName, required String email, required String companyName, required String address, required String city, required String pin}) async {
@@ -15,10 +14,8 @@ class HrmsBackendService {
     if (currentUser == null) throw StateError('User is not authenticated');
     companyId ??= currentUser.uid;
     final batch = db.batch();
-    final userRef = db.collection('users').doc(currentUser.uid);
-    final companyRef = db.collection('companies').doc(companyId);
-    batch.set(userRef, {'uid': currentUser.uid, 'phone': currentUser.phoneNumber ?? '', 'name': fullName, 'email': email, 'companyId': companyId, 'role': 'admin', 'updatedAt': FieldValue.serverTimestamp(), 'createdAt': FieldValue.serverTimestamp()}, SetOptions(merge: true));
-    batch.set(companyRef, {'name': companyName, 'address': address, 'city': city, 'pin': pin, 'ownerId': currentUser.uid, 'updatedAt': FieldValue.serverTimestamp(), 'createdAt': FieldValue.serverTimestamp()}, SetOptions(merge: true));
+    batch.set(db.collection('users').doc(currentUser.uid), {'uid': currentUser.uid, 'phone': currentUser.phoneNumber ?? '', 'name': fullName, 'email': email, 'companyId': companyId, 'role': 'admin', 'updatedAt': FieldValue.serverTimestamp(), 'createdAt': FieldValue.serverTimestamp()}, SetOptions(merge: true));
+    batch.set(db.collection('companies').doc(companyId), {'name': companyName, 'address': address, 'city': city, 'pin': pin, 'ownerId': currentUser.uid, 'updatedAt': FieldValue.serverTimestamp(), 'createdAt': FieldValue.serverTimestamp()}, SetOptions(merge: true));
     await batch.commit();
   }
 
@@ -37,19 +34,11 @@ class HrmsBackendService {
     await loadCompanyId();
     if (companyId == null) return;
     final employeeSnap = await _employees().get();
-    if (employeeSnap.docs.isNotEmpty) {
-      service.employees
-        ..clear()
-        ..addAll(employeeSnap.docs.map((d) => _employeeFromMap(d.data(), d.id)));
-    }
+    if (employeeSnap.docs.isNotEmpty) service.employees..clear()..addAll(employeeSnap.docs.map((d) => _employeeFromMap(d.data(), d.id)));
     final attendanceSnap = await _attendance().limit(500).get();
-    service.attendance
-      ..clear()
-      ..addAll(attendanceSnap.docs.map(_attendanceFromMap));
+    service.attendance..clear()..addAll(attendanceSnap.docs.map(_attendanceFromMap));
     final leaveSnap = await _leaves().limit(500).get();
-    service.leaves
-      ..clear()
-      ..addAll(leaveSnap.docs.map(_leaveFromMap));
+    service.leaves..clear()..addAll(leaveSnap.docs.map(_leaveFromMap));
   }
 
   Employee _employeeFromMap(Map<String, dynamic> d, String id) {
@@ -59,10 +48,8 @@ class HrmsBackendService {
 
   AttendanceRecord _attendanceFromMap(QueryDocumentSnapshot<Map<String, dynamic>> d) {
     final x = d.data();
-    DateTime date = DateTime.now();
     DateTime? asDate(dynamic v) => v is Timestamp ? v.toDate() : null;
-    date = asDate(x['date']) ?? date;
-    return AttendanceRecord(employeeId: x['employeeId'] as String? ?? '', date: date, punchIn: asDate(x['punchIn']), punchOut: asDate(x['punchOut']), breakTime: Duration(minutes: (x['breakMinutes'] as num?)?.toInt() ?? 0), status: x['status'] as String? ?? 'Present', wfh: x['wfh'] as bool? ?? false);
+    return AttendanceRecord(employeeId: x['employeeId'] as String? ?? '', date: asDate(x['date']) ?? DateTime.now(), punchIn: asDate(x['punchIn']), punchOut: asDate(x['punchOut']), breakTime: Duration(minutes: (x['breakMinutes'] as num?)?.toInt() ?? 0), status: x['status'] as String? ?? 'Present', wfh: x['wfh'] as bool? ?? false);
   }
 
   LeaveRequest _leaveFromMap(QueryDocumentSnapshot<Map<String, dynamic>> d) {
@@ -123,5 +110,23 @@ class HrmsBackendService {
     if (companyId == null) await loadCompanyId();
     if (companyId == null) return;
     await db.collection('companies').doc(companyId).collection('officeLocations').doc(id).set({'name': name, 'latitude': latitude, 'longitude': longitude, 'radiusMeters': radiusMeters, 'enabled': true, 'updatedAt': FieldValue.serverTimestamp()}, SetOptions(merge: true));
+  }
+
+  Future<void> createQrSession({required String sessionId, Duration validity = const Duration(minutes: 5)}) async {
+    if (companyId == null) await loadCompanyId();
+    if (companyId == null) throw StateError('Company is not configured');
+    await db.collection('companies').doc(companyId).collection('qrSessions').doc(sessionId).set({'companyId': companyId, 'active': true, 'expiresAt': Timestamp.fromDate(DateTime.now().add(validity)), 'createdAt': FieldValue.serverTimestamp(), 'createdBy': user?.uid});
+  }
+
+  Future<bool> validateQrSession(String payload) async {
+    final parts = payload.split('|');
+    if (parts.length != 3 || parts[0] != 'HRMS') return false;
+    final cid = parts[1];
+    final sessionId = parts[2];
+    final snap = await db.collection('companies').doc(cid).collection('qrSessions').doc(sessionId).get();
+    final d = snap.data();
+    if (d == null || d['active'] != true) return false;
+    final expiry = d['expiresAt'];
+    return expiry is Timestamp && expiry.toDate().isAfter(DateTime.now());
   }
 }
