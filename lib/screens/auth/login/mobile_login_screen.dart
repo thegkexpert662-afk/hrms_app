@@ -8,11 +8,7 @@ class MobileLoginScreen extends StatefulWidget {
   final String initialEmail;
   final void Function(String email) onSignedIn;
 
-  const MobileLoginScreen({
-    super.key,
-    this.initialEmail = '',
-    required this.onSignedIn,
-  });
+  const MobileLoginScreen({super.key, this.initialEmail = '', required this.onSignedIn});
 
   @override
   State<MobileLoginScreen> createState() => _MobileLoginScreenState();
@@ -58,14 +54,8 @@ class _MobileLoginScreenState extends State<MobileLoginScreen> {
     });
 
     try {
-      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-
-      if (mounted) {
-        widget.onSignedIn(credential.user?.email ?? email);
-      }
+      final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(email: email, password: password);
+      if (mounted) widget.onSignedIn(credential.user?.email ?? email);
     } on FirebaseAuthException catch (e) {
       String message;
       switch (e.code) {
@@ -91,10 +81,7 @@ class _MobileLoginScreenState extends State<MobileLoginScreen> {
       }
       if (mounted) setState(() { loading = false; error = message; });
     } catch (_) {
-      if (mounted) setState(() {
-        loading = false;
-        error = 'Something went wrong. Please try again.';
-      });
+      if (mounted) setState(() { loading = false; error = 'Something went wrong. Please try again.'; });
     }
   }
 
@@ -108,9 +95,7 @@ class _MobileLoginScreenState extends State<MobileLoginScreen> {
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Password reset email sent. Check your inbox.')),
-      );
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Password reset email sent. Check your inbox.')));
     } on FirebaseAuthException catch (e) {
       if (mounted) setState(() => error = e.message ?? 'Could not send reset email');
     }
@@ -173,7 +158,6 @@ class _MobileLoginScreenState extends State<MobileLoginScreen> {
               onPressed: loading ? null : () => setState(() => obscurePassword = !obscurePassword),
               icon: Icon(obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined),
             ),
-            errorText: error,
             filled: true,
             fillColor: Colors.white.withValues(alpha: .88),
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(18), borderSide: BorderSide.none),
@@ -182,10 +166,7 @@ class _MobileLoginScreenState extends State<MobileLoginScreen> {
         ),
         Align(
           alignment: Alignment.centerRight,
-          child: TextButton(
-            onPressed: loading ? null : resetPassword,
-            child: const Text('Forgot password?'),
-          ),
+          child: TextButton(onPressed: loading ? null : resetPassword, child: const Text('Forgot password?')),
         ),
         const SizedBox(height: 4),
         SizedBox(
@@ -193,21 +174,13 @@ class _MobileLoginScreenState extends State<MobileLoginScreen> {
           height: 56,
           child: FilledButton.icon(
             onPressed: loading ? null : signIn,
-            icon: loading
-                ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                : const Icon(Icons.login_rounded),
+            icon: loading ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.login_rounded),
             label: Text(loading ? 'Signing in...' : 'Sign In', style: const TextStyle(fontWeight: FontWeight.w700)),
             style: FilledButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18))),
           ),
         ),
         const SizedBox(height: 18),
-        const Center(
-          child: Text(
-            'Your account is protected with Firebase Authentication.',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 12, color: Colors.black54),
-          ),
-        ),
+        const Center(child: Text('Your account is protected with Firebase Authentication.', textAlign: TextAlign.center, style: TextStyle(fontSize: 12, color: Colors.black54))),
       ],
     ),
   );
@@ -244,15 +217,7 @@ class _AuthShellState extends State<_AuthShell> with SingleTickerProviderStateMi
         animation: controller,
         builder: (_, __) => Stack(
           children: [
-            Container(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Color(0xFFF8FCFF), Color(0xFFE9F7FF)],
-                ),
-              ),
-            ),
+            Container(decoration: const BoxDecoration(gradient: LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [Color(0xFFF8FCFF), Color(0xFFE9F7FF)]))),
             Positioned.fill(child: CustomPaint(painter: _WaterPainter(controller.value))),
             SafeArea(
               child: Center(
@@ -265,31 +230,16 @@ class _AuthShellState extends State<_AuthShell> with SingleTickerProviderStateMi
                       children: [
                         Row(
                           children: [
-                            Container(
-                              width: 44,
-                              height: 44,
-                              padding: const EdgeInsets.all(6),
-                              decoration: BoxDecoration(color: Colors.white.withValues(alpha: .82), borderRadius: BorderRadius.circular(14)),
-                              child: SvgPicture.asset('assets/hrms_logo.svg'),
-                            ),
+                            Container(width: 44, height: 44, padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: Colors.white.withValues(alpha: .82), borderRadius: BorderRadius.circular(14)), child: SvgPicture.asset('assets/hrms_logo.svg')),
                             const SizedBox(width: 12),
                             const Expanded(child: Text('Kopersay HRMS', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800))),
                             Text('${widget.step}/4', style: const TextStyle(fontWeight: FontWeight.w700)),
                           ],
                         ),
                         const SizedBox(height: 14),
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(20),
-                          child: LinearProgressIndicator(value: widget.step / 4, minHeight: 5),
-                        ),
+                        ClipRRect(borderRadius: BorderRadius.circular(20), child: LinearProgressIndicator(value: widget.step / 4, minHeight: 5)),
                         const SizedBox(height: 18),
-                        Card(
-                          elevation: 10,
-                          shadowColor: Colors.black.withValues(alpha: .10),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                          color: Colors.white.withValues(alpha: .93),
-                          child: Padding(padding: const EdgeInsets.all(24), child: widget.child),
-                        ),
+                        Card(elevation: 10, shadowColor: Colors.black.withValues(alpha: .10), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)), color: Colors.white.withValues(alpha: .93), child: Padding(padding: const EdgeInsets.all(24), child: widget.child)),
                       ],
                     ),
                   ),
@@ -316,18 +266,11 @@ class _WaterPainter extends CustomPainter {
       final amp = 22.0 + i * 8;
       final speed = progress * math.pi * 2 * (i.isEven ? 1 : -1);
       path.moveTo(0, base);
-      for (double x = 0; x <= size.width; x += 8) {
-        final y = base + math.sin((x / size.width) * math.pi * 4 + speed) * amp;
-        path.lineTo(x, y);
-      }
+      for (double x = 0; x <= size.width; x += 8) path.lineTo(x, base + math.sin((x / size.width) * math.pi * 4 + speed) * amp);
       path.lineTo(size.width, size.height);
       path.lineTo(0, size.height);
       path.close();
-      paint.color = [
-        const Color(0x220A7BD5),
-        const Color(0x1800A7A0),
-        const Color(0x120756A6),
-      ][i];
+      paint.color = [const Color(0x220A7BD5), const Color(0x1800A7A0), const Color(0x120756A6)][i];
       canvas.drawPath(path, paint);
     }
 
