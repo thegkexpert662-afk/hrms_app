@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class SplashScreen extends StatefulWidget {
   final VoidCallback onDone;
@@ -21,28 +22,39 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 104,
-              height: 104,
-              decoration: BoxDecoration(
-                color: scheme.primaryContainer,
-                borderRadius: BorderRadius.circular(28),
+      body: SafeArea(
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 28),
+                child: SvgPicture.asset(
+                  'assets/hrms_logo.svg',
+                  width: 330,
+                  height: 145,
+                  fit: BoxFit.contain,
+                  semanticsLabel: 'HRMS logo',
+                ),
               ),
-              child: Icon(Icons.business_center_rounded, size: 58, color: scheme.primary),
-            ),
-            const SizedBox(height: 24),
-            const Text('HRMS Management System', textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 27, fontWeight: FontWeight.w800)),
-            const SizedBox(height: 8),
-            Text('Smart Human Resource Management',
-                style: TextStyle(color: scheme.onSurfaceVariant)),
-            const SizedBox(height: 30),
-            const SizedBox(width: 28, height: 28, child: CircularProgressIndicator()),
-          ],
+              const SizedBox(height: 18),
+              Text(
+                'Human Resource Management System',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 28),
+              const SizedBox(
+                width: 26,
+                height: 26,
+                child: CircularProgressIndicator(strokeWidth: 2.5),
+              ),
+            ],
+          ),
         ),
       ),
     );
