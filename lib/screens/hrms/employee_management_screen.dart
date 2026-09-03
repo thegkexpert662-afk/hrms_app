@@ -18,25 +18,74 @@ class _EmployeeManagementScreenState extends State<EmployeeManagementScreen> {
   Future<void> addOrEdit({Employee? employee}) async {
     final e = await showModalBottomSheet<Employee>(context: context, isScrollControlled: true, builder: (_) => _EmployeeForm(employee: employee));
     if (!mounted || e == null) return;
-    employee == null ? widget.service.addEmployee(e) : widget.service.updateEmployee(e);
+    if (employee == null) {
+      widget.service.addEmployee(e);
+    } else {
+      widget.service.updateEmployee(e);
+    }
   }
 
   void profile(Employee e) {
-    showModalBottomSheet<void>(context: context, isScrollControlled: true, builder: (_) => _EmployeeProfile(employee: e, date: date, onEdit: () { Navigator.pop(context); addOrEdit(employee: e); }, onDelete: () { Navigator.pop(context); widget.service.removeEmployee(e.id); }));
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => _EmployeeProfile(
+        employee: e,
+        date: date,
+        onEdit: () { Navigator.pop(context); addOrEdit(employee: e); },
+        onDelete: () { Navigator.pop(context); widget.service.removeEmployee(e.id); },
+      ),
+    );
   }
 
-  @override Widget build(BuildContext context) => AnimatedBuilder(
-    animation: widget.service,
-    builder: (_, __) => ListView(padding: const EdgeInsets.all(16), children: [
-      Row(children: [Expanded(child: Text('Employee Management', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800))), FilledButton.icon(onPressed: () => addOrEdit(), icon: const Icon(Icons.person_add), label: const Text('Add Employee'))]),
-      const SizedBox(height: 14),
-      TextField(onChanged: (v) => setState(() => query = v), decoration: const InputDecoration(prefixIcon: Icon(Icons.search), hintText: 'Search name, ID, department or designation', border: OutlineInputBorder())),
-      const SizedBox(height: 14),
-      Card(child: Padding(padding: const EdgeInsets.all(16), child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [_stat('Total', widget.service.employees.length), _stat('Active', widget.service.employees.where((e) => e.status == 'Active').length), _stat('Inactive', widget.service.employees.where((e) => e.status != 'Active').length)]))),
-      const SizedBox(height: 10),
-      ...filtered.map((e) => Card(margin: const EdgeInsets.only(bottom: 10), child: ListTile(onTap: () => profile(e), leading: CircleAvatar(child: Text(e.name.isEmpty ? '?' : e.name[0].toUpperCase())), title: Text(e.name, style: const TextStyle(fontWeight: FontWeight.w700)), subtitle: Text('${e.id} • ${e.designation}\n${e.department} • ${e.phone}'), isThreeLine: true, trailing: PopupMenuButton<String>(onSelected: (v) { if (v == 'edit') addOrEdit(employee: e); if (v == 'delete') widget.service.removeEmployee(e.id); }, itemBuilder: (_) => const [PopupMenuItem(value: 'edit', child: Text('Edit')), PopupMenuItem(value: 'delete', child: Text('Delete'))])))),
-    ]),
-  );
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: widget.service,
+      builder: (_, __) => ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Row(children: [
+            Expanded(child: Text('Employee Management', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800))),
+            FilledButton.icon(onPressed: () => addOrEdit(), icon: const Icon(Icons.person_add), label: const Text('Add Employee')),
+          ]),
+          const SizedBox(height: 14),
+          TextField(onChanged: (v) => setState(() => query = v), decoration: const InputDecoration(prefixIcon: Icon(Icons.search), hintText: 'Search name, ID, department or designation', border: OutlineInputBorder())),
+          const SizedBox(height: 14),
+          Card(child: Padding(padding: const EdgeInsets.all(16), child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+            _stat('Total', widget.service.employees.length),
+            _stat('Active', widget.service.employees.where((e) => e.status == 'Active').length),
+            _stat('Inactive', widget.service.employees.where((e) => e.status != 'Active').length),
+          ]))),
+          const SizedBox(height: 10),
+          ...filtered.map(_employeeCard),
+        ],
+      ),
+    );
+  }
+
+  Widget _employeeCard(Employee e) {
+    return Card(
+      margin: const EdgeInsets.only(bottom: 10),
+      child: ListTile(
+        onTap: () => profile(e),
+        leading: CircleAvatar(child: Text(e.name.isEmpty ? '?' : e.name[0].toUpperCase())),
+        title: Text(e.name, style: const TextStyle(fontWeight: FontWeight.w700)),
+        subtitle: Text('${e.id} • ${e.designation}\n${e.department} • ${e.phone}'),
+        isThreeLine: true,
+        trailing: PopupMenuButton<String>(
+          onSelected: (v) {
+            if (v == 'edit') addOrEdit(employee: e);
+            if (v == 'delete') widget.service.removeEmployee(e.id);
+          },
+          itemBuilder: (_) => const [
+            PopupMenuItem(value: 'edit', child: Text('Edit')),
+            PopupMenuItem(value: 'delete', child: Text('Delete')),
+          ],
+        ),
+      ),
+    );
+  }
 
   Widget _stat(String label, int value) => Column(children: [Text('$value', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800)), Text(label)]);
 }
@@ -53,13 +102,46 @@ class _EmployeeFormState extends State<_EmployeeForm> {
   DateTime joining = DateTime.now();
   String employment = 'Full Time', status = 'Active';
   final fields = const ['name','phone','email','gender','dob','address','city','state','pinCode','department','designation','manager','emergencyName','emergencyRelation','emergencyPhone','bankName','accountNumber','ifsc','documentName','documentNumber','bloodGroup','skills','education','experience'];
-  @override void initState() { super.initState(); final e = widget.employee; c = {for (final f in fields) f: TextEditingController(text: _value(e, f))}; joining = e?.joiningDate ?? DateTime.now(); employment = e?.employmentType ?? 'Full Time'; status = e?.status ?? 'Active'; }
+
+  @override void initState() {
+    super.initState();
+    final e = widget.employee;
+    c = {for (final f in fields) f: TextEditingController(text: _value(e, f))};
+    joining = e?.joiningDate ?? DateTime.now();
+    employment = e?.employmentType ?? 'Full Time';
+    status = e?.status ?? 'Active';
+  }
+
   String _value(Employee? e, String f) {
     if (e == null) return '';
     switch (f) {
-      case 'name': return e.name; case 'phone': return e.phone; case 'email': return e.email; case 'gender': return e.gender; case 'dob': return e.dob; case 'address': return e.address; case 'city': return e.city; case 'state': return e.state; case 'pinCode': return e.pinCode; case 'department': return e.department; case 'designation': return e.designation; case 'manager': return e.manager; case 'emergencyName': return e.emergencyName; case 'emergencyRelation': return e.emergencyRelation; case 'emergencyPhone': return e.emergencyPhone; case 'bankName': return e.bankName; case 'accountNumber': return e.accountNumber; case 'ifsc': return e.ifsc; case 'documentName': return e.documentName; case 'documentNumber': return e.documentNumber; case 'bloodGroup': return e.bloodGroup; case 'skills': return e.skills; case 'education': return e.education; default: return e.experience;
+      case 'name': return e.name;
+      case 'phone': return e.phone;
+      case 'email': return e.email;
+      case 'gender': return e.gender;
+      case 'dob': return e.dob;
+      case 'address': return e.address;
+      case 'city': return e.city;
+      case 'state': return e.state;
+      case 'pinCode': return e.pinCode;
+      case 'department': return e.department;
+      case 'designation': return e.designation;
+      case 'manager': return e.manager;
+      case 'emergencyName': return e.emergencyName;
+      case 'emergencyRelation': return e.emergencyRelation;
+      case 'emergencyPhone': return e.emergencyPhone;
+      case 'bankName': return e.bankName;
+      case 'accountNumber': return e.accountNumber;
+      case 'ifsc': return e.ifsc;
+      case 'documentName': return e.documentName;
+      case 'documentNumber': return e.documentNumber;
+      case 'bloodGroup': return e.bloodGroup;
+      case 'skills': return e.skills;
+      case 'education': return e.education;
+      default: return e.experience;
     }
   }
+
   @override void dispose() { for (final x in c.values) x.dispose(); super.dispose(); }
   Widget field(String key, String label, {bool required = false, int lines = 1}) => Padding(padding: const EdgeInsets.only(bottom: 12), child: TextFormField(controller: c[key], maxLines: lines, validator: required ? (v) => v == null || v.trim().isEmpty ? 'Required' : null : null, decoration: InputDecoration(labelText: label, border: const OutlineInputBorder())));
   Widget section(String title, List<Widget> children) => Card(margin: const EdgeInsets.only(bottom: 12), child: Padding(padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)), const SizedBox(height: 14), ...children])));
