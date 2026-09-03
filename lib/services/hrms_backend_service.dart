@@ -81,6 +81,13 @@ class HrmsBackendService {
 
   Future<void> updateLeaveStatus(String id, String status) async { if (companyId == null) await loadCompanyId(); if (companyId != null) await _leaves().doc(id).set({'status': status, 'updatedAt': FieldValue.serverTimestamp()}, SetOptions(merge: true)); }
 
+  Future<void> savePayroll(PayrollRecord record, {required String period}) async {
+    if (companyId == null) await loadCompanyId();
+    if (companyId == null) return;
+    final id = '${record.employeeId}_$period';
+    await db.collection('companies').doc(companyId).collection('payroll').doc(id).set({'employeeId': record.employeeId, 'period': period, 'basic': record.basic, 'allowances': record.allowances, 'bonus': record.bonus, 'overtime': record.overtime, 'deductions': record.deductions, 'gross': record.gross, 'net': record.net, 'processedAt': FieldValue.serverTimestamp(), 'processedBy': user?.uid}, SetOptions(merge: true));
+  }
+
   Stream<QuerySnapshot<Map<String, dynamic>>> notificationStream() async* {
     if (companyId == null) await loadCompanyId();
     if (companyId == null) return;
