@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
 import '../../app/hrms_app.dart';
 import 'module_screens.dart' hide DashboardScreen;
-import 'dashboard_screen.dart';
+import 'dashboard_home_screen.dart';
 
 class HrmsNavigator extends StatefulWidget {
   final HrmsService service;
   const HrmsNavigator({super.key, required this.service});
-
   @override
   State<HrmsNavigator> createState() => _HrmsNavigatorState();
 }
 
 class _HrmsNavigatorState extends State<HrmsNavigator> {
   int selected = 0;
-
   final titles = const [
     'Dashboard', 'Employee Management', 'Employee Lifecycle', 'Attendance', 'Leave Management',
     'Payroll', 'Department & Organization', 'Shift & Roster', 'Performance Management',
@@ -21,7 +19,6 @@ class _HrmsNavigatorState extends State<HrmsNavigator> {
     'Asset Management', 'Notifications', 'Company Communication', 'Reports & Analytics',
     'Admin & Security', 'Company Settings', 'Advanced Attendance',
   ];
-
   final icons = const [
     Icons.dashboard, Icons.people, Icons.timeline, Icons.access_time, Icons.event_available,
     Icons.payments, Icons.account_tree, Icons.schedule, Icons.insights, Icons.folder, Icons.work,
@@ -32,7 +29,7 @@ class _HrmsNavigatorState extends State<HrmsNavigator> {
   Widget page() {
     final s = widget.service;
     switch (selected) {
-      case 0: return DashboardScreen(service: s);
+      case 0: return DashboardHomeScreen(service: s);
       case 1: return EmployeeScreen(service: s);
       case 2: return LifecycleScreen(service: s);
       case 3: return AttendanceScreen(service: s);
@@ -56,44 +53,38 @@ class _HrmsNavigatorState extends State<HrmsNavigator> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(titles[selected], style: const TextStyle(fontWeight: FontWeight.w800)),
-        actions: [
-          IconButton(onPressed: () => setState(() {}), icon: const Icon(Icons.refresh)),
-          const Padding(padding: EdgeInsets.only(right: 16), child: CircleAvatar(child: Icon(Icons.person))),
-        ],
-      ),
-      drawer: Drawer(
-        child: SafeArea(
-          child: Column(
-            children: [
-              const UserAccountsDrawerHeader(
-                decoration: BoxDecoration(),
-                currentAccountPicture: CircleAvatar(child: Icon(Icons.business)),
-                accountName: Text('HRMS MANAGEMENT'),
-                accountEmail: Text('Complete Human Resource Management'),
-              ),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: titles.length,
-                  itemBuilder: (c, i) => ListTile(
-                    selected: i == selected,
-                    leading: Icon(icons[i]),
-                    title: Text(titles[i]),
-                    onTap: () {
-                      setState(() => selected = i);
-                      Navigator.pop(context);
-                    },
-                  ),
-                ),
-              ),
-            ],
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(
+      title: Text(titles[selected], style: const TextStyle(fontWeight: FontWeight.w800)),
+      actions: [
+        IconButton(onPressed: () => setState(() {}), icon: const Icon(Icons.refresh)),
+        const Padding(padding: EdgeInsets.only(right: 16), child: CircleAvatar(child: Icon(Icons.person))),
+      ],
+    ),
+    drawer: Drawer(
+      child: SafeArea(
+        child: Column(children: [
+          const UserAccountsDrawerHeader(
+            decoration: BoxDecoration(),
+            currentAccountPicture: CircleAvatar(child: Icon(Icons.business)),
+            accountName: Text('HRMS MANAGEMENT'),
+            accountEmail: Text('Complete Human Resource Management'),
           ),
-        ),
+          Expanded(child: ListView.builder(
+            itemCount: titles.length,
+            itemBuilder: (c, i) => ListTile(
+              selected: i == selected,
+              leading: Icon(icons[i]),
+              title: Text(titles[i]),
+              onTap: () {
+                setState(() => selected = i);
+                Navigator.pop(context);
+              },
+            ),
+          )),
+        ]),
       ),
-      body: page(),
-    );
-  }
+    ),
+    body: page(),
+  );
 }
