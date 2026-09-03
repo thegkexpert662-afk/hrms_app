@@ -26,6 +26,7 @@ class _AuthFlowState extends State<AuthFlow> {
   String pinCode = '';
 
   void next() { if (mounted) setState(() => step++); }
+  void goTo(int value) { if (mounted) setState(() => step = value); }
 
   @override
   Widget build(BuildContext context) {
@@ -44,7 +45,7 @@ class _AuthFlowState extends State<AuthFlow> {
                 resendToken: resendToken,
                 onVerified: () {
                   Navigator.of(context).pop();
-                  next();
+                  goTo(3);
                 },
                 onBack: () => Navigator.of(context).pop(),
               ),
@@ -52,11 +53,26 @@ class _AuthFlowState extends State<AuthFlow> {
           },
           onAutoVerified: (value) {
             phone = value;
-            next();
+            goTo(3);
           },
         );
       case 2:
-        return const SizedBox.shrink();
+        return MobileLoginScreen(
+          initialPhone: phone,
+          onCodeSent: (value, verificationId, resendToken) {
+            phone = value;
+            Navigator.of(context).push(MaterialPageRoute<void>(
+              builder: (_) => OtpVerificationScreen(
+                phone: value,
+                verificationId: verificationId,
+                resendToken: resendToken,
+                onVerified: () { Navigator.of(context).pop(); goTo(3); },
+                onBack: () => Navigator.of(context).pop(),
+              ),
+            ));
+          },
+          onAutoVerified: (value) { phone = value; goTo(3); },
+        );
       case 3:
         return ProfileSetupScreen(
           initialName: fullName,
