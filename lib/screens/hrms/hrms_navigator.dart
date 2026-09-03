@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../app/hrms_app.dart';
 import 'module_screens.dart'
-    hide DashboardScreen, EmployeeScreen, LifecycleScreen, AttendanceScreen, AssetsScreen, NotificationsScreen, CommunicationScreen, ReportsScreen;
+    hide DashboardScreen, EmployeeScreen, LifecycleScreen, AttendanceScreen, AssetsScreen, NotificationsScreen, CommunicationScreen, ReportsScreen, AdminScreen;
 import 'dashboard_home_screen.dart';
 import 'employee_management_screen.dart';
 import 'lifecycle_management_screen.dart';
@@ -10,6 +10,7 @@ import 'asset_management_screen.dart';
 import 'notification_management_screen.dart';
 import 'communication_management_screen.dart';
 import 'report_management_screen.dart';
+import 'admin_security_screen.dart';
 
 class HrmsNavigator extends StatefulWidget {
   final HrmsService service;
@@ -58,7 +59,7 @@ class _HrmsNavigatorState extends State<HrmsNavigator> {
       case 14: return NotificationsScreen(service: service);
       case 15: return CommunicationScreen(service: service);
       case 16: return ReportsScreen(service: service);
-      case 17: return AdminScreen(service: service);
+      case 17: return AdminSecurityScreen(service: service);
       case 18: return SettingsScreen(service: service);
       default: return AdvancedAttendanceScreen(service: service);
     }
