@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../app/hrms_app.dart';
 import 'module_screens.dart'
-    hide DashboardScreen, EmployeeScreen, LifecycleScreen, AttendanceScreen, AssetsScreen, NotificationsScreen, CommunicationScreen, ReportsScreen, AdminScreen, SettingsScreen;
+    hide DashboardScreen, EmployeeScreen, LifecycleScreen, AttendanceScreen, AssetsScreen, NotificationsScreen, CommunicationScreen, ReportsScreen, AdminScreen, SettingsScreen, AdvancedAttendanceScreen;
 import 'dashboard_home_screen.dart';
 import 'employee_management_screen.dart';
 import 'lifecycle_management_screen.dart';
