@@ -33,9 +33,7 @@ class _QrAttendanceScreenState extends State<QrAttendanceScreen> {
   }
 
   String _time(DateTime? value) => value == null ? '--' : '${value.hour.toString().padLeft(2, '0')}:${value.minute.toString().padLeft(2, '0')}';
-
-  @override
-  void dispose() { controller.dispose(); super.dispose(); }
+  @override void dispose() { controller.dispose(); super.dispose(); }
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -43,7 +41,8 @@ class _QrAttendanceScreenState extends State<QrAttendanceScreen> {
     body: Column(children: [
       Expanded(child: Stack(children: [
         MobileScanner(controller: controller, onDetect: (capture) {
-          final value = capture.barcodes.firstOrNull?.rawValue;
+          if (capture.barcodes.isEmpty) return;
+          final value = capture.barcodes.first.rawValue;
           if (value != null && value.isNotEmpty) _handle(value);
         }),
         Center(child: Container(width: 250, height: 250, decoration: BoxDecoration(border: Border.all(width: 3), borderRadius: BorderRadius.circular(24)))),
