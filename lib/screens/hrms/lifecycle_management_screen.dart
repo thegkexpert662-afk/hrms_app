@@ -19,18 +19,23 @@ class _LifecycleManagementScreenState extends State<LifecycleManagementScreen> {
     final status = TextEditingController(text: 'Pending');
     final ok = await showDialog<bool>(
       context: context,
-      builder: (_) => AlertDialog(
+      builder: (dialogContext) => AlertDialog(
         title: Text('Add $section'),
         content: SingleChildScrollView(child: Column(children: [
-          TextField(controller:name, decoration:const InputDecoration(labelText:'Candidate / Employee / Title',border:OutlineInputBorder())),
-          const SizedBox(height:12), TextField(controller:detail,maxLines:3,decoration:const InputDecoration(labelText:'Details / Notes',border:OutlineInputBorder())),
-          const SizedBox(height:12), TextField(controller:status,decoration:const InputDecoration(labelText:'Status',border:OutlineInputBorder())),
+          TextField(controller: name, decoration: const InputDecoration(labelText: 'Candidate / Employee / Title', border: OutlineInputBorder())),
+          const SizedBox(height: 12),
+          TextField(controller: detail, maxLines: 3, decoration: const InputDecoration(labelText: 'Details / Notes', border: OutlineInputBorder())),
+          const SizedBox(height: 12),
+          TextField(controller: status, decoration: const InputDecoration(labelText: 'Status', border: OutlineInputBorder())),
         ])),
-        actions:[TextButton(onPressed:()=>Navigator.pop(context,false),child:const Text('Cancel')),FilledButton(onPressed:()=>Navigator.pop(context,name.text.trim().isNotEmpty),child:const Text('Save'))],
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Cancel')),
+          FilledButton(onPressed: () => Navigator.pop(dialogContext, name.text.trim().isNotEmpty), child: const Text('Save')),
+        ],
       ),
     );
     if (ok == true && mounted) {
-      setState(() => data[section]!.add({'name':name.text.trim(),'detail':detail.text.trim(),'status':status.text.trim(),'date':'${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}'}));
+      setState(() => data[section]!.add({'name': name.text.trim(), 'detail': detail.text.trim(), 'status': status.text.trim(), 'date': '${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}'}));
     }
     name.dispose(); detail.dispose(); status.dispose();
   }
@@ -38,21 +43,44 @@ class _LifecycleManagementScreenState extends State<LifecycleManagementScreen> {
   @override Widget build(BuildContext context) => ListView(
     padding: const EdgeInsets.all(16),
     children: [
-      Row(children:[Expanded(child:Text('Employee Lifecycle',style:Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight:FontWeight.w800))),const Icon(Icons.timeline,size:32)]),
-      const SizedBox(height:8), const Text('Manage the complete employee journey from recruitment to exit.'), const SizedBox(height:16),
-      ...sections.map((s) => Card(
-        margin: const EdgeInsets.only(bottom:10),
-        child: ExpansionTile(
-          leading: Icon(_icon(s)), title: Text(s,style:const TextStyle(fontWeight:FontWeight.w700)), subtitle: Text('${data[s]!.length} record${data[s]!.length == 1 ? '' : 's'}'),
-          children: [
-            if (data[s]!.isEmpty) const Padding(padding:EdgeInsets.all(16),child:Align(alignment:Alignment.centerLeft,child:Text('No records yet.'))),
-            ...List.generate(data[s]!.length,(i){final r=data[s]![i];return ListTile(title:Text(r['name'] ?? ''),subtitle:Text('${r['detail'] ?? ''}\n${r['status'] ?? ''} • ${r['date'] ?? ''}'),isThreeLine:true,trailing:IconButton(icon:const Icon(Icons.delete_outline),onPressed:()=>setState(()=>data[s]!.removeAt(i)));}),
-            Padding(padding:const EdgeInsets.fromLTRB(16,4,16,16),child:Align(alignment:Alignment.centerRight,child:FilledButton.icon(onPressed:()=>add(s),icon:const Icon(Icons.add),label:const Text('Add Record')))),
-          ],
-        ),
-      )),
+      Row(children: [Expanded(child: Text('Employee Lifecycle', style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w800))), const Icon(Icons.timeline, size: 32)]),
+      const SizedBox(height: 8),
+      const Text('Manage the complete employee journey from recruitment to exit.'),
+      const SizedBox(height: 16),
+      ...sections.map((s) => _sectionCard(s)),
     ],
   );
 
-  IconData _icon(String s){if(s=='Recruitment')return Icons.person_search;if(s=='Candidate')return Icons.badge;if(s=='Interview')return Icons.forum;if(s=='Offer')return Icons.description;if(s.contains('Joining'))return Icons.how_to_reg;if(s.contains('Probation'))return Icons.verified;if(s.contains('Transfer'))return Icons.swap_horiz;return Icons.exit_to_app;}
+  Widget _sectionCard(String s) => Card(
+    margin: const EdgeInsets.only(bottom: 10),
+    child: ExpansionTile(
+      leading: Icon(_icon(s)),
+      title: Text(s, style: const TextStyle(fontWeight: FontWeight.w700)),
+      subtitle: Text('${data[s]!.length} record${data[s]!.length == 1 ? '' : 's'}'),
+      children: [
+        if (data[s]!.isEmpty) const Padding(padding: EdgeInsets.all(16), child: Align(alignment: Alignment.centerLeft, child: Text('No records yet.'))),
+        ...List.generate(data[s]!.length, (i) {
+          final r = data[s]![i];
+          return ListTile(
+            title: Text(r['name'] ?? ''),
+            subtitle: Text('${r['detail'] ?? ''}\n${r['status'] ?? ''} • ${r['date'] ?? ''}'),
+            isThreeLine: true,
+            trailing: IconButton(icon: const Icon(Icons.delete_outline), onPressed: () => setState(() { data[s]!.removeAt(i); })),
+          );
+        }),
+        Padding(padding: const EdgeInsets.fromLTRB(16, 4, 16, 16), child: Align(alignment: Alignment.centerRight, child: FilledButton.icon(onPressed: () => add(s), icon: const Icon(Icons.add), label: const Text('Add Record')))),
+      ],
+    ),
+  );
+
+  IconData _icon(String s) {
+    if (s == 'Recruitment') return Icons.person_search;
+    if (s == 'Candidate') return Icons.badge;
+    if (s == 'Interview') return Icons.forum;
+    if (s == 'Offer') return Icons.description;
+    if (s.contains('Joining')) return Icons.how_to_reg;
+    if (s.contains('Probation')) return Icons.verified;
+    if (s.contains('Transfer')) return Icons.swap_horiz;
+    return Icons.exit_to_app;
+  }
 }
