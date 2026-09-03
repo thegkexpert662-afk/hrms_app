@@ -9,11 +9,11 @@ service cloud.firestore {
 
     match /users/{uid} {
       allow read: if signedIn() && (request.auth.uid == uid || userData().role == 'owner');
-      allow create: if signedIn() && request.auth.uid == uid && request.resource.data.uid == uid;
-      allow update: if signedIn() && request.auth.uid == uid
-        && request.resource.data.uid == resource.data.uid
-        && request.resource.data.companyId == resource.data.companyId
-        && request.resource.data.role == resource.data.role;
+      allow create: if signedIn() && ((request.auth.uid == uid && request.resource.data.uid == uid) || isAdmin(request.resource.data.companyId));
+      allow update: if signedIn() && (
+        (request.auth.uid == uid && request.resource.data.uid == resource.data.uid && request.resource.data.companyId == resource.data.companyId && request.resource.data.role == resource.data.role)
+        || (isAdmin(resource.data.companyId) && request.resource.data.uid == resource.data.uid && request.resource.data.companyId == resource.data.companyId)
+      );
       allow delete: if false;
     }
 
@@ -27,35 +27,34 @@ service cloud.firestore {
         allow read: if sameCompany(companyId);
         allow create, update, delete: if isAdmin(companyId);
       }
-
       match /attendance/{recordId} {
         allow read: if isAdmin(companyId) || sameEmployee(resource.data.employeeId);
         allow create, update: if isAdmin(companyId) || (sameEmployee(request.resource.data.employeeId) && request.resource.data.employeeId == resource.data.employeeId);
         allow delete: if isAdmin(companyId);
       }
-
       match /leaves/{leaveId} {
         allow read: if isAdmin(companyId) || sameEmployee(resource.data.employeeId);
         allow create: if isAdmin(companyId) || sameEmployee(request.resource.data.employeeId);
         allow update: if isAdmin(companyId) || (sameEmployee(resource.data.employeeId) && request.resource.data.employeeId == resource.data.employeeId && request.resource.data.status == resource.data.status);
         allow delete: if isAdmin(companyId);
       }
-
+      match /payroll/{payrollId} {
+        allow read: if isAdmin(companyId) || sameEmployee(resource.data.employeeId);
+        allow create, update: if isAdmin(companyId);
+        allow delete: if userData().role == 'owner' || userData().role == 'admin';
+      }
       match /notifications/{notificationId} {
         allow read: if sameCompany(companyId);
         allow create, update, delete: if isAdmin(companyId);
       }
-
       match /settings/{settingId} {
         allow read: if sameCompany(companyId);
         allow write: if isAdmin(companyId);
       }
-
       match /officeLocations/{locationId} {
         allow read: if sameCompany(companyId);
         allow write: if isAdmin(companyId);
       }
-
       match /qrSessions/{sessionId} {
         allow read: if sameCompany(companyId);
         allow create, update, delete: if isAdmin(companyId);
