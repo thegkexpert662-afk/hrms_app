@@ -12,6 +12,7 @@ import 'communication_management_screen.dart';
 import 'report_management_screen.dart';
 import 'admin_security_screen.dart';
 import 'company_settings_screen.dart';
+import 'advanced_attendance_screen.dart';
 
 class HrmsNavigator extends StatefulWidget {
   final HrmsService service;
@@ -62,7 +63,8 @@ class _HrmsNavigatorState extends State<HrmsNavigator> {
       case 16: return ReportsScreen(service: service);
       case 17: return AdminSecurityScreen(service: service);
       case 18: return CompanySettingsScreen(service: service);
-      default: return AdvancedAttendanceScreen(service: service);
+      case 19: return AdvancedAttendanceScreen(service: service);
+      default: return DashboardHomeScreen(service: service);
     }
   }
 
