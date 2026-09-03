@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import '../../app/hrms_app.dart';
-import 'module_screens.dart' hide DashboardScreen, EmployeeScreen, LifecycleScreen, AttendanceScreen;
+import 'module_screens.dart' hide DashboardScreen, EmployeeScreen, LifecycleScreen, AttendanceScreen, AssetsScreen;
 import 'dashboard_home_screen.dart';
 import 'employee_management_screen.dart';
 import 'lifecycle_management_screen.dart';
 import 'attendance_management_screen.dart';
+import 'asset_management_screen.dart';
 
 class HrmsNavigator extends StatefulWidget {
   final HrmsService service;
