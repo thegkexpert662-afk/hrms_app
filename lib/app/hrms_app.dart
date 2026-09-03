@@ -4,8 +4,30 @@ import '../screens/auth/auth_flow.dart';
 class Employee {
   final String id;
   String name, department, designation, manager, employmentType, status, phone, email;
+  String gender, dob, address, city, state, pinCode;
+  String emergencyName, emergencyRelation, emergencyPhone;
+  String bankName, accountNumber, ifsc;
+  String documentName, documentNumber;
+  String bloodGroup, skills, education, experience;
   DateTime joiningDate;
-  Employee({required this.id, required this.name, required this.department, required this.designation, required this.manager, required this.joiningDate, required this.employmentType, required this.status, required this.phone, required this.email});
+
+  Employee({
+    required this.id,
+    required this.name,
+    required this.department,
+    required this.designation,
+    required this.manager,
+    required this.joiningDate,
+    required this.employmentType,
+    required this.status,
+    required this.phone,
+    required this.email,
+    this.gender = '', this.dob = '', this.address = '', this.city = '', this.state = '', this.pinCode = '',
+    this.emergencyName = '', this.emergencyRelation = '', this.emergencyPhone = '',
+    this.bankName = '', this.accountNumber = '', this.ifsc = '',
+    this.documentName = '', this.documentNumber = '',
+    this.bloodGroup = '', this.skills = '', this.education = '', this.experience = '',
+  });
 }
 
 class AttendanceRecord {
@@ -38,9 +60,9 @@ class PayrollRecord {
 
 class HrmsService extends ChangeNotifier {
   final List<Employee> employees=[
-    Employee(id:'EMP001',name:'Aarav Sharma',department:'Engineering',designation:'Senior Developer',manager:'HR Admin',joiningDate:DateTime(2024,2,12),employmentType:'Full Time',status:'Active',phone:'9876543210',email:'aarav@company.com'),
-    Employee(id:'EMP002',name:'Ananya Singh',department:'Human Resources',designation:'HR Executive',manager:'HR Admin',joiningDate:DateTime(2025,5,6),employmentType:'Full Time',status:'Active',phone:'9876543211',email:'ananya@company.com'),
-    Employee(id:'EMP003',name:'Rohan Verma',department:'Sales',designation:'Sales Manager',manager:'HR Admin',joiningDate:DateTime(2023,8,20),employmentType:'Full Time',status:'Active',phone:'9876543212',email:'rohan@company.com'),
+    Employee(id:'EMP001',name:'Aarav Sharma',department:'Engineering',designation:'Senior Developer',manager:'HR Admin',joiningDate:DateTime(2024,2,12),employmentType:'Full Time',status:'Active',phone:'9876543210',email:'aarav@company.com',gender:'Male',city:'Delhi',skills:'Flutter, Dart',education:'B.Tech',experience:'5 years'),
+    Employee(id:'EMP002',name:'Ananya Singh',department:'Human Resources',designation:'HR Executive',manager:'HR Admin',joiningDate:DateTime(2025,5,6),employmentType:'Full Time',status:'Active',phone:'9876543211',email:'ananya@company.com',gender:'Female',city:'Noida',skills:'HR, Recruitment',education:'MBA HR',experience:'3 years'),
+    Employee(id:'EMP003',name:'Rohan Verma',department:'Sales',designation:'Sales Manager',manager:'HR Admin',joiningDate:DateTime(2023,8,20),employmentType:'Full Time',status:'Active',phone:'9876543212',email:'rohan@company.com',gender:'Male',city:'Gurugram',skills:'Sales, CRM',education:'BBA',experience:'6 years'),
   ];
   final List<AttendanceRecord> attendance=[];
   final List<LeaveRequest> leaves=[];
