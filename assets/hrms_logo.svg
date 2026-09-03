@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520">
+  <defs>
+    <linearGradient id="blueGreen" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#0756A6"/>
+      <stop offset="1" stop-color="#2DBE45"/>
+    </linearGradient>
+    <linearGradient id="greenGray" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#2DBE45"/>
+      <stop offset="1" stop-color="#4E5965"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke-linecap="round">
+    <path d="M220 120 A380 190 0 0 1 980 120" stroke="url(#blueGreen)" stroke-width="34"/>
+    <path d="M220 400 A380 190 0 0 0 980 400" stroke="url(#greenGray)" stroke-width="34"/>
+  </g>
+  <g font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="250">
+    <text x="135" y="330" fill="#0756A6">HR</text>
+    <text x="600" y="330" fill="#2DBE45">M</text>
+    <text x="865" y="330" fill="#4E5965">S</text>
+  </g>
+  <circle cx="480" cy="190" r="30" fill="#FFFFFF"/>
+  <path d="M420 275 C420 225 470 210 510 240 L535 330 L420 330 Z" fill="#FFFFFF"/>
+  <circle cx="735" cy="185" r="30" fill="#2DBE45"/>
+  <path d="M675 275 L735 330 L795 275 L795 330 L675 330 Z" fill="#2DBE45"/>
+</svg>
