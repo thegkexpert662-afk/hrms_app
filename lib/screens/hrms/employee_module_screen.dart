@@ -33,11 +33,14 @@ class EmployeeModuleScreen extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 38,
-                    backgroundColor: accent.withOpacity(.12),
+                    backgroundColor: accent.withValues(alpha: 0.12),
                     child: Icon(icon, color: accent, size: 42),
                   ),
                   const SizedBox(height: 16),
-                  Text(title, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800)),
+                  Text(
+                    title,
+                    style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800),
+                  ),
                   const SizedBox(height: 8),
                   Text(
                     '$title module',
@@ -56,18 +59,27 @@ class EmployeeModuleScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Quick Actions', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
+                  const Text(
+                    'Quick Actions',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
+                  ),
                   const SizedBox(height: 14),
-                  FilledButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.add_rounded),
-                    label: Text('Create $title Request'),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: () {},
+                      icon: const Icon(Icons.add_rounded),
+                      label: Text('Create $title Request'),
+                    ),
                   ),
                   const SizedBox(height: 10),
-                  OutlinedButton.icon(
-                    onPressed: () {},
-                    icon: const Icon(Icons.history_rounded),
-                    label: const Text('View History'),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () {},
+                      icon: const Icon(Icons.history_rounded),
+                      label: const Text('View History'),
+                    ),
                   ),
                 ],
               ),
