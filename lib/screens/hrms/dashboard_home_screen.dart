@@ -11,7 +11,6 @@ class DashboardHomeScreen extends StatefulWidget {
 
 class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
   DateTime selectedDate = DateTime.now();
-
   HrmsService get service => widget.service;
 
   @override
@@ -53,6 +52,8 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
                           children: [
                             _welcome(context, now),
                             const SizedBox(height: 14),
+                            _punchCard(),
+                            const SizedBox(height: 14),
                             LayoutBuilder(
                               builder: (context, constraints) {
                                 final columns = constraints.maxWidth >= 1000 ? 4 : constraints.maxWidth >= 620 ? 2 : 1;
@@ -85,17 +86,9 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
                                         flex: 2,
                                         child: Column(
                                           children: [
-                                            _section(
-                                              'Birthdays / Anniversaries',
-                                              Icons.celebration_rounded,
-                                              _birthdayContent(),
-                                            ),
+                                            _section('Birthdays / Anniversaries', Icons.celebration_rounded, _birthdayContent()),
                                             const SizedBox(height: 14),
-                                            _section(
-                                              'New Joiners',
-                                              Icons.person_add_alt_1_rounded,
-                                              _joinerContent(newJoiners),
-                                            ),
+                                            _section('New Joiners', Icons.person_add_alt_1_rounded, _joinerContent(newJoiners)),
                                           ],
                                         ),
                                       ),
@@ -149,19 +142,145 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
     );
   }
 
+  Widget _punchCard() {
+    final employee = service.employees.isEmpty ? null : service.employees.first;
+    final record = employee == null ? null : service.todayFor(employee.id);
+    final punchedIn = record?.punchIn != null;
+    final punchedOut = record?.punchOut != null;
+    final working = record?.workingTime ?? Duration.zero;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(.96),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFD6EDF4)),
+        boxShadow: [BoxShadow(color: const Color(0xFF168AAD).withOpacity(.06), blurRadius: 12, offset: const Offset(0, 4))],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 38,
+                height: 38,
+                decoration: const BoxDecoration(color: Color(0xFFE1F5FA), shape: BoxShape.circle),
+                child: const Icon(Icons.fingerprint_rounded, color: Color(0xFF168AAD), size: 22),
+              ),
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('My Attendance', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)),
+                    SizedBox(height: 2),
+                    Text('Today • Punch in / Punch out', style: TextStyle(fontSize: 11.5)),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+                decoration: BoxDecoration(
+                  color: punchedOut ? const Color(0xFFEAF7EE) : punchedIn ? const Color(0xFFEAF8FC) : const Color(0xFFF4F6F8),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  punchedOut ? 'Completed' : punchedIn ? 'Working' : 'Not punched in',
+                  style: TextStyle(fontSize: 10.5, fontWeight: FontWeight.w700, color: punchedOut ? const Color(0xFF2E7D32) : const Color(0xFF168AAD)),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(child: _timeInfo('Punch In', record?.punchIn, Icons.login_rounded)),
+              const SizedBox(width: 10),
+              Expanded(child: _timeInfo('Punch Out', record?.punchOut, Icons.logout_rounded)),
+              const SizedBox(width: 10),
+              Expanded(child: _durationInfo(working)),
+            ],
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton.icon(
+              onPressed: employee == null || punchedOut
+                  ? null
+                  : () {
+                      if (!punchedIn) {
+                        service.punchIn(employee.id);
+                      } else {
+                        service.punchOut(employee.id);
+                      }
+                    },
+              icon: Icon(punchedIn ? Icons.logout_rounded : Icons.login_rounded),
+              label: Text(punchedIn ? 'Punch Out' : 'Punch In'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _timeInfo(String title, DateTime? time, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+      decoration: BoxDecoration(color: const Color(0xFFF5FBFD), borderRadius: BorderRadius.circular(12)),
+      child: Row(
+        children: [
+          Icon(icon, color: const Color(0xFF168AAD), size: 18),
+          const SizedBox(width: 7),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 2),
+                Text(time == null ? '--:--' : _time(time), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _durationInfo(Duration duration) {
+    final hours = duration.inHours;
+    final minutes = duration.inMinutes.remainder(60);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 9),
+      decoration: BoxDecoration(color: const Color(0xFFF5FBFD), borderRadius: BorderRadius.circular(12)),
+      child: Row(
+        children: [
+          const Icon(Icons.timer_outlined, color: Color(0xFF168AAD), size: 18),
+          const SizedBox(width: 7),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('Working', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600)),
+                const SizedBox(height: 2),
+                Text('${hours}h ${minutes.toString().padLeft(2, '0')}m', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800)),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _time(DateTime d) => '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}';
+
   Widget _welcome(BuildContext context, DateTime now) {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF087EA4), Color(0xFF2BA9C6)],
-        ),
-        boxShadow: [
-          BoxShadow(color: const Color(0xFF168AAD).withOpacity(.15), blurRadius: 16, offset: const Offset(0, 6)),
-        ],
+        gradient: const LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: [Color(0xFF087EA4), Color(0xFF2BA9C6)]),
+        boxShadow: [BoxShadow(color: const Color(0xFF168AAD).withOpacity(.15), blurRadius: 16, offset: const Offset(0, 6))],
       ),
       child: Row(
         children: [
@@ -200,29 +319,12 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
   Widget _metric(String title, int value, IconData icon) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(.92),
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: const Color(0xFFD8EEF5)),
-        boxShadow: [BoxShadow(color: const Color(0xFF168AAD).withOpacity(.05), blurRadius: 9, offset: const Offset(0, 3))],
-      ),
+      decoration: BoxDecoration(color: Colors.white.withOpacity(.92), borderRadius: BorderRadius.circular(15), border: Border.all(color: const Color(0xFFD8EEF5)), boxShadow: [BoxShadow(color: const Color(0xFF168AAD).withOpacity(.05), blurRadius: 9, offset: const Offset(0, 3))]),
       child: Row(
         children: [
-          Container(
-            width: 38,
-            height: 38,
-            decoration: const BoxDecoration(color: Color(0xFFE1F5FA), shape: BoxShape.circle),
-            child: Icon(icon, color: Color(0xFF168AAD), size: 20),
-          ),
+          Container(width: 38, height: 38, decoration: const BoxDecoration(color: Color(0xFFE1F5FA), shape: BoxShape.circle), child: Icon(icon, color: Color(0xFF168AAD), size: 20)),
           const SizedBox(width: 10),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('$value', style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w800)),
-              Text(title, style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600)),
-            ],
-          ),
+          Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [Text('$value', style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w800)), Text(title, style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600))]),
         ],
       ),
     );
@@ -231,61 +333,19 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
   Widget _calendar(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(12, 12, 12, 11),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(.94),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: const Color(0xFFD6EDF4)),
-        boxShadow: [BoxShadow(color: const Color(0xFF168AAD).withOpacity(.05), blurRadius: 12, offset: const Offset(0, 4))],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 34,
-                height: 34,
-                decoration: const BoxDecoration(color: Color(0xFFE1F5FA), shape: BoxShape.circle),
-                child: const Icon(Icons.calendar_month_rounded, color: Color(0xFF168AAD), size: 19),
-              ),
-              const SizedBox(width: 9),
-              const Text('Calendar', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800)),
-              const Spacer(),
-              Text(_date(selectedDate), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF168AAD))),
-            ],
-          ),
-          CalendarDatePicker(
-            initialDate: selectedDate,
-            firstDate: DateTime(2020),
-            lastDate: DateTime(2035),
-            currentDate: DateTime.now(),
-            onDateChanged: (date) => setState(() => selectedDate = date),
-          ),
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 4),
-            padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9),
-            decoration: BoxDecoration(color: const Color(0xFFEAF8FC), borderRadius: BorderRadius.circular(11)),
-            child: Row(
-              children: [
-                const Icon(Icons.event_available_rounded, color: Color(0xFF168AAD), size: 18),
-                const SizedBox(width: 7),
-                const Text('Selected Date', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
-                const Spacer(),
-                Text(_date(selectedDate), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Color(0xFF168AAD))),
-              ],
-            ),
-          ),
-        ],
-      ),
+      decoration: BoxDecoration(color: Colors.white.withOpacity(.94), borderRadius: BorderRadius.circular(18), border: Border.all(color: const Color(0xFFD6EDF4)), boxShadow: [BoxShadow(color: const Color(0xFF168AAD).withOpacity(.05), blurRadius: 12, offset: const Offset(0, 4))]),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Row(children: [Container(width: 34, height: 34, decoration: const BoxDecoration(color: Color(0xFFE1F5FA), shape: BoxShape.circle), child: const Icon(Icons.calendar_month_rounded, color: Color(0xFF168AAD), size: 19)), const SizedBox(width: 9), const Text('Calendar', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800)), const Spacer(), Text(_date(selectedDate), style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Color(0xFF168AAD)))]),
+        CalendarDatePicker(initialDate: selectedDate, firstDate: DateTime(2020), lastDate: DateTime(2035), currentDate: DateTime.now(), onDateChanged: (date) => setState(() => selectedDate = date)),
+        Container(margin: const EdgeInsets.symmetric(horizontal: 4), padding: const EdgeInsets.symmetric(horizontal: 11, vertical: 9), decoration: BoxDecoration(color: const Color(0xFFEAF8FC), borderRadius: BorderRadius.circular(11)), child: Row(children: [const Icon(Icons.event_available_rounded, color: Color(0xFF168AAD), size: 18), const SizedBox(width: 7), const Text('Selected Date', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600)), const Spacer(), Text(_date(selectedDate), style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Color(0xFF168AAD)))])),
+      ]),
     );
   }
 
   Widget _birthdayContent() {
     final now = DateTime.now();
     final birthdays = service.employees.where((e) => e.joiningDate.month == now.month).take(4).toList();
-    if (birthdays.isEmpty) {
-      return const _EmptyTile(icon: Icons.celebration_rounded, text: 'No birthdays or anniversaries this month.');
-    }
+    if (birthdays.isEmpty) return const _EmptyTile(icon: Icons.celebration_rounded, text: 'No birthdays or anniversaries this month.');
     return Column(children: birthdays.map((e) => _personTile(e, 'This month')).toList());
   }
 
@@ -295,104 +355,27 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
   }
 
   Widget _personTile(Employee e, String label) {
-    return ListTile(
-      dense: true,
-      contentPadding: EdgeInsets.zero,
-      leading: CircleAvatar(
-        radius: 17,
-        backgroundColor: const Color(0xFFDDF5FA),
-        child: Text(e.name.isEmpty ? '?' : e.name[0].toUpperCase()),
-      ),
-      title: Text(e.name, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)),
-      subtitle: Text('$label • ${e.department}', style: const TextStyle(fontSize: 11)),
-    );
+    return ListTile(dense: true, contentPadding: EdgeInsets.zero, leading: CircleAvatar(radius: 17, backgroundColor: const Color(0xFFDDF5FA), child: Text(e.name.isEmpty ? '?' : e.name[0].toUpperCase())), title: Text(e.name, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700)), subtitle: Text('$label • ${e.department}', style: const TextStyle(fontSize: 11)));
   }
 
   Widget _attendanceSummary(int total, int present, int absent, int leave) {
-    return _section(
-      'Attendance Summary',
-      Icons.pie_chart_rounded,
-      Column(
-        children: [
-          _miniProgress('Present', present, total),
-          _miniProgress('Absent', absent, total),
-          _miniProgress('Leave', leave, total),
-          _miniProgress('Working Days', total == 0 ? 0 : 1, 1),
-        ],
-      ),
-    );
+    return _section('Attendance Summary', Icons.pie_chart_rounded, Column(children: [_miniProgress('Present', present, total), _miniProgress('Absent', absent, total), _miniProgress('Leave', leave, total), _miniProgress('Working Days', total == 0 ? 0 : 1, 1)]));
   }
 
   Widget _miniProgress(String label, int value, int total) {
     final ratio = total == 0 ? 0.0 : (value / total).clamp(0.0, 1.0);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 9),
-      child: Row(
-        children: [
-          SizedBox(width: 88, child: Text(label, style: const TextStyle(fontSize: 12))),
-          Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: LinearProgressIndicator(
-                value: ratio,
-                minHeight: 7,
-                backgroundColor: const Color(0xFFE3F3F7),
-                valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF2AA8C5)),
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          SizedBox(width: 36, child: Text('$value', textAlign: TextAlign.end, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700))),
-        ],
-      ),
-    );
+    return Padding(padding: const EdgeInsets.only(bottom: 9), child: Row(children: [SizedBox(width: 88, child: Text(label, style: const TextStyle(fontSize: 12))), Expanded(child: ClipRRect(borderRadius: BorderRadius.circular(8), child: LinearProgressIndicator(value: ratio, minHeight: 7, backgroundColor: const Color(0xFFE3F3F7), valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF2AA8C5)))), const SizedBox(width: 8), SizedBox(width: 36, child: Text('$value', textAlign: TextAlign.end, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)))]));
   }
 
   Widget _quickInfo() {
-    return _section(
-      'Quick Info',
-      Icons.info_outline_rounded,
-      const Padding(
-        padding: EdgeInsets.symmetric(vertical: 7),
-        child: Row(
-          children: [
-            Icon(Icons.lightbulb_outline_rounded, color: Color(0xFF168AAD), size: 26),
-            SizedBox(width: 10),
-            Expanded(child: Text('Keep your employee data updated and your team informed.', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600))),
-          ],
-        ),
-      ),
-    );
+    return _section('Quick Info', Icons.info_outline_rounded, const Padding(padding: EdgeInsets.symmetric(vertical: 7), child: Row(children: [Icon(Icons.lightbulb_outline_rounded, color: Color(0xFF168AAD), size: 26), SizedBox(width: 10), Expanded(child: Text('Keep your employee data updated and your team informed.', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)))]));
   }
 
   Widget _section(String title, IconData icon, Widget child) {
     return Container(
       padding: const EdgeInsets.fromLTRB(14, 12, 14, 10),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(.94),
-        borderRadius: BorderRadius.circular(17),
-        border: Border.all(color: const Color(0xFFD6EDF4)),
-        boxShadow: [BoxShadow(color: const Color(0xFF168AAD).withOpacity(.04), blurRadius: 9, offset: const Offset(0, 3))],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Container(
-                width: 32,
-                height: 32,
-                decoration: const BoxDecoration(color: Color(0xFFE1F5FA), shape: BoxShape.circle),
-                child: Icon(icon, color: Color(0xFF168AAD), size: 17),
-              ),
-              const SizedBox(width: 8),
-              Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
-            ],
-          ),
-          const Divider(height: 18),
-          child,
-        ],
-      ),
+      decoration: BoxDecoration(color: Colors.white.withOpacity(.94), borderRadius: BorderRadius.circular(17), border: Border.all(color: const Color(0xFFD6EDF4)), boxShadow: [BoxShadow(color: const Color(0xFF168AAD).withOpacity(.04), blurRadius: 9, offset: const Offset(0, 3))]),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Row(children: [Container(width: 32, height: 32, decoration: const BoxDecoration(color: Color(0xFFE1F5FA), shape: BoxShape.circle), child: Icon(icon, color: Color(0xFF168AAD), size: 17)), const SizedBox(width: 8), Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800))]), const Divider(height: 18), child]),
     );
   }
 
@@ -406,18 +389,7 @@ class _EmptyTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 17),
-      decoration: BoxDecoration(color: const Color(0xFFF1F9FC), borderRadius: BorderRadius.circular(12)),
-      child: Row(
-        children: [
-          Icon(icon, color: const Color(0xFF168AAD), size: 26),
-          const SizedBox(width: 10),
-          Expanded(child: Text(text, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600))),
-        ],
-      ),
-    );
+    return Container(width: double.infinity, padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 17), decoration: BoxDecoration(color: const Color(0xFFF1F9FC), borderRadius: BorderRadius.circular(12)), child: Row(children: [Icon(icon, color: const Color(0xFF168AAD), size: 26), const SizedBox(width: 10), Expanded(child: Text(text, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)))]));
   }
 }
 
@@ -427,17 +399,6 @@ class _WaterMark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IgnorePointer(
-      child: Opacity(
-        opacity: .10,
-        child: Stack(
-          alignment: Alignment.center,
-          children: [
-            Icon(Icons.water_drop_rounded, size: size, color: const Color(0xFF168AAD)),
-            Positioned(right: size * .13, top: size * .18, child: Icon(Icons.water_drop_rounded, size: size * .22, color: const Color(0xFF2AA8C5))),
-          ],
-        ),
-      ),
-    );
+    return IgnorePointer(child: Opacity(opacity: .055, child: Icon(Icons.water_drop_rounded, size: size, color: const Color(0xFF168AAD))));
   }
 }
