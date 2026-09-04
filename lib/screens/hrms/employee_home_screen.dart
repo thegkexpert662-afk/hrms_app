@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/hrms_app.dart';
+import 'employee_module_screen.dart';
 
 class EmployeeHomeScreen extends StatefulWidget {
   final HrmsService service;
@@ -50,7 +51,7 @@ class _EmployeeHomeScreenState extends State<EmployeeHomeScreen> {
                 child: Row(
                   children: [
                     const Expanded(child: Text('Company policies, notices and important updates.')),
-                    FilledButton(onPressed: () => _message('Corporate Guidelines'), child: const Text('View')),
+                    FilledButton(onPressed: () => _openModule('Corporate Guidelines', Icons.campaign_rounded), child: const Text('View')),
                   ],
                 ),
               ),
@@ -140,7 +141,7 @@ class _EmployeeHomeScreenState extends State<EmployeeHomeScreen> {
               mainAxisSpacing: 12,
               childAspectRatio: .88,
             ),
-            itemBuilder: (_, i) => _applicationTile(apps[i], () => _message(apps[i].label)),
+            itemBuilder: (_, i) => _applicationTile(apps[i], () => _openModule(apps[i].label, apps[i].icon, accent: apps[i].color)),
           );
         },
       ),
@@ -164,7 +165,7 @@ class _EmployeeHomeScreenState extends State<EmployeeHomeScreen> {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: columns, crossAxisSpacing: 12, mainAxisSpacing: 12, childAspectRatio: 1.15),
-            itemBuilder: (_, i) => _viewTile(items[i][0] as String, items[i][1] as IconData, () => _message(items[i][0] as String)),
+            itemBuilder: (_, i) => _viewTile(items[i][0] as String, items[i][1] as IconData, () => _openModule(items[i][0] as String, items[i][1] as IconData)),
           );
         },
       ),
@@ -174,7 +175,7 @@ class _EmployeeHomeScreenState extends State<EmployeeHomeScreen> {
   Widget _birthdaySection(Employee? employee) {
     return _panel(
       title: 'Birthday',
-      trailing: TextButton(onPressed: () => _message('Birthdays'), child: const Text('View All')),
+      trailing: TextButton(onPressed: () => _openModule('Birthdays', Icons.cake_rounded), child: const Text('View All')),
       child: ListTile(
         contentPadding: EdgeInsets.zero,
         leading: const CircleAvatar(radius: 28, child: Icon(Icons.cake_rounded)),
@@ -271,7 +272,13 @@ class _EmployeeHomeScreenState extends State<EmployeeHomeScreen> {
     ),
   );
 
-  void _message(String title) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$title module is ready for the employee workflow.')));
+  void _openModule(String title, IconData icon, {Color accent = water}) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => EmployeeModuleScreen(title: title, icon: icon, accent: accent),
+      ),
+    );
+  }
 
   String _date(DateTime d) => '${d.day.toString().padLeft(2, '0')}-${d.month.toString().padLeft(2, '0')}-${d.year}';
   String _monthName(int m) => const ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'][m - 1];
