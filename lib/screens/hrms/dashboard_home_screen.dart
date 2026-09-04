@@ -363,8 +363,40 @@ class _DashboardHomeScreenState extends State<DashboardHomeScreen> {
   }
 
   Widget _miniProgress(String label, int value, int total) {
-    final ratio = total == 0 ? 0.0 : (value / total).clamp(0.0, 1.0);
-    return Padding(padding: const EdgeInsets.only(bottom: 9), child: Row(children: [SizedBox(width: 88, child: Text(label, style: const TextStyle(fontSize: 12))), Expanded(child: ClipRRect(borderRadius: BorderRadius.circular(8), child: LinearProgressIndicator(value: ratio, minHeight: 7, backgroundColor: const Color(0xFFE3F3F7), valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF2AA8C5)))), const SizedBox(width: 8), SizedBox(width: 36, child: Text('$value', textAlign: TextAlign.end, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700)))]));
+    final double ratio =
+        total == 0 ? 0.0 : (value / total).clamp(0.0, 1.0).toDouble();
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 9),
+      child: Row(
+        children: [
+          SizedBox(
+            width: 88,
+            child: Text(label, style: const TextStyle(fontSize: 12)),
+          ),
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: LinearProgressIndicator(
+                value: ratio,
+                minHeight: 7,
+                backgroundColor: const Color(0xFFE3F3F7),
+                valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF2AA8C5)),
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          SizedBox(
+            width: 36,
+            child: Text(
+              '$value',
+              textAlign: TextAlign.end,
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _quickInfo() {
