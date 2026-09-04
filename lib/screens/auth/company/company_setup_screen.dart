@@ -5,7 +5,7 @@ class CompanySetupScreen extends StatefulWidget {
   final String initialAddress;
   final String initialCity;
   final String initialPin;
-  final void Function(String company, String address, String city, String pin) onDone;
+  final Future<void> Function(String company, String address, String city, String pin) onDone;
 
   const CompanySetupScreen({
     super.key,
@@ -26,6 +26,7 @@ class _CompanySetupScreenState extends State<CompanySetupScreen> {
   late final TextEditingController cityController;
   late final TextEditingController pinController;
   String? error;
+  bool saving = false;
 
   @override
   void initState() {
@@ -45,7 +46,8 @@ class _CompanySetupScreenState extends State<CompanySetupScreen> {
     super.dispose();
   }
 
-  void finish() {
+  Future<void> finish() async {
+    if (saving) return;
     final company = companyController.text.trim();
     final address = addressController.text.trim();
     final city = cityController.text.trim();
@@ -56,7 +58,16 @@ class _CompanySetupScreenState extends State<CompanySetupScreen> {
       return;
     }
 
-    widget.onDone(company, address, city, pin);
+    setState(() {
+      error = null;
+      saving = true;
+    });
+
+    try {
+      await widget.onDone(company, address, city, pin);
+    } finally {
+      if (mounted) setState(() => saving = false);
+    }
   }
 
   InputDecoration fieldDecoration(String label) {
@@ -133,9 +144,11 @@ class _CompanySetupScreenState extends State<CompanySetupScreen> {
                   SizedBox(
                     height: 54,
                     child: FilledButton.icon(
-                      onPressed: finish,
-                      icon: const Icon(Icons.check_rounded),
-                      label: const Text('Complete Setup'),
+                      onPressed: saving ? null : finish,
+                      icon: saving
+                          ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+                          : const Icon(Icons.check_rounded),
+                      label: Text(saving ? 'Saving...' : 'Complete Setup'),
                     ),
                   ),
                 ],
