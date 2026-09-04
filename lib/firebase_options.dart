@@ -47,13 +47,13 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBuFZXARrPa4AyUZg7M5dYvpm37Wqv2KKU',
-    appId: '1:27946741891:web:d53fb42d96c06ff003abb6',
-    messagingSenderId: '27946741891',
-    projectId: 'hrms-app-960b5',
-    authDomain: 'hrms-app-960b5.firebaseapp.com',
-    storageBucket: 'hrms-app-960b5.firebasestorage.app',
-    measurementId: 'G-QX9BZQNY89',
+    apiKey: 'AIzaSyDaIQ11LT3WvlB-8vR59p6qrfAzSlBvpCA',
+    appId: '1:257901978820:web:4fd4f96bcadc4bdb845591',
+    messagingSenderId: '257901978820',
+    projectId: 'kopersayhrms',
+    authDomain: 'kopersayhrms.firebaseapp.com',
+    storageBucket: 'kopersayhrms.firebasestorage.app',
+    measurementId: 'G-XJ4G5BLJ8B',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
