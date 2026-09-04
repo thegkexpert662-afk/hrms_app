@@ -10,9 +10,6 @@ import 'asset_management_screen.dart';
 import 'notification_management_screen.dart';
 import 'communication_management_screen.dart';
 import 'report_management_screen.dart';
-import 'admin_security_screen.dart';
-import 'company_settings_screen.dart';
-import 'advanced_attendance_screen.dart';
 
 class HrmsNavigator extends StatefulWidget {
   final HrmsService service;
@@ -30,15 +27,16 @@ class _HrmsNavigatorState extends State<HrmsNavigator> {
     'Leave Management', 'Payroll', 'Department & Organization', 'Shift & Roster',
     'Performance Management', 'Document Management', 'Recruitment', 'Employee Self Service',
     'Expense Management', 'Asset Management', 'Notifications', 'Company Communication',
-    'Reports & Analytics', 'Admin & Security', 'Company Settings', 'Advanced Attendance',
+    'Reports & Analytics',
   ];
 
   static const icons = <IconData>[
-    Icons.dashboard, Icons.people, Icons.timeline, Icons.access_time,
-    Icons.event_available, Icons.payments, Icons.account_tree, Icons.schedule,
-    Icons.insights, Icons.folder, Icons.work, Icons.person, Icons.receipt_long,
-    Icons.devices, Icons.notifications, Icons.campaign, Icons.analytics,
-    Icons.security, Icons.settings, Icons.gps_fixed,
+    Icons.dashboard_rounded, Icons.people_alt_rounded, Icons.timeline_rounded,
+    Icons.access_time_rounded, Icons.event_available_rounded, Icons.payments_rounded,
+    Icons.account_tree_rounded, Icons.schedule_rounded, Icons.insights_rounded,
+    Icons.folder_rounded, Icons.work_outline_rounded, Icons.person_outline_rounded,
+    Icons.receipt_long_rounded, Icons.devices_rounded, Icons.notifications_rounded,
+    Icons.campaign_rounded, Icons.analytics_rounded,
   ];
 
   Widget page() {
@@ -61,9 +59,6 @@ class _HrmsNavigatorState extends State<HrmsNavigator> {
       case 14: return NotificationsScreen(service: service);
       case 15: return CommunicationScreen(service: service);
       case 16: return ReportsScreen(service: service);
-      case 17: return AdminSecurityScreen(service: service);
-      case 18: return CompanySettingsScreen(service: service);
-      case 19: return AdvancedAttendanceScreen(service: service);
       default: return DashboardHomeScreen(service: service);
     }
   }
@@ -74,8 +69,8 @@ class _HrmsNavigatorState extends State<HrmsNavigator> {
       appBar: AppBar(
         title: Text(titles[selected], style: const TextStyle(fontWeight: FontWeight.w800)),
         actions: [
-          IconButton(onPressed: () => setState(() {}), icon: const Icon(Icons.refresh)),
-          const Padding(padding: EdgeInsets.only(right: 16), child: CircleAvatar(child: Icon(Icons.person))),
+          IconButton(onPressed: () => setState(() {}), icon: const Icon(Icons.refresh_rounded)),
+          const Padding(padding: EdgeInsets.only(right: 16), child: CircleAvatar(child: Icon(Icons.person_rounded))),
         ],
       ),
       drawer: Drawer(
@@ -84,9 +79,9 @@ class _HrmsNavigatorState extends State<HrmsNavigator> {
             children: [
               const UserAccountsDrawerHeader(
                 decoration: BoxDecoration(),
-                currentAccountPicture: CircleAvatar(child: Icon(Icons.business)),
+                currentAccountPicture: CircleAvatar(child: Icon(Icons.water_drop_rounded)),
                 accountName: Text('HRMS MANAGEMENT'),
-                accountEmail: Text('Complete Human Resource Management'),
+                accountEmail: Text('Human Resource Management'),
               ),
               Expanded(
                 child: ListView.builder(
